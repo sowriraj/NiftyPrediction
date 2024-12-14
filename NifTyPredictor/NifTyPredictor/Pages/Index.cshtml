@@ -1,0 +1,242 @@
+﻿@page
+@model IndexPageModel
+@{
+    ViewData["Title"] = "Nifty 50 Companies";
+    var highlightedCompanies = new List<string> { "NIFTY 50", "RELIANCE", "TCS", "HDFCBANK", "HUL", "ICICIBANK", "BAJFINANCE", "SBIN", "KOTAKBANK", "AXISBANK", "INFY" };
+    var highlighted = Model.Companies.Where(c => highlightedCompanies.Contains(c.Symbol)).ToList();
+    var others = Model.Companies.Where(c => !highlightedCompanies.Contains(c.Symbol)).ToList();
+    var niftyClass = Model.Companies?.FirstOrDefault(x => x?.Symbol == "NIFTY 50")?.LastPrice > Model.Companies?.FirstOrDefault(x => x?.Symbol == "NIFTY 50")?.PreviousClose ? "text-success" : "text-danger";
+    var volumeClass = "text-danger";
+
+    string ConvertToMillions(string volume) {
+
+        if (decimal.TryParse(volume, out var num)) 
+        {
+            var millionValue = num / 1_000_000;
+            if (millionValue>=1)
+            {
+                volumeClass = "text-success";
+            }
+
+            return millionValue.ToString("0.##M");
+
+        }
+        
+        return "Invalid"; 
+    
+    }
+}
+  
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary">Up/Down</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h2 class="text-success">UP: @Model.Companies.Where(x => x.Symbol != "NIFTY 50").Where(x => x.Change > 0).Count() </h2>
+                        </div>
+                        <div class="col-md-6">
+                            <h2 color="text-danger">Down: @Model.Companies.Where(x => x.Symbol != "NIFTY 50").Where(x => x.Change < 0).Count() </h2>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-body">
+                        <h5 class="card-title text-secondary">Prediction</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h2 class="text-success">UP: @Model.Companies.Where(x => x.PredictedValueEMA >= x.LastPrice).Count() </h2>
+                            </div>
+                            <div class="col-md-6">
+                                <h2 class="text-danger">Down: @Model.Companies.Where(x => x.PredictedValueEMA <= x.LastPrice).Count() </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary">Nifty Value</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h2 class="@niftyClass">@Model.Companies?.FirstOrDefault(x => x.Symbol == "NIFTY 50").LastPrice </h2>
+                        </div>
+                        <div class="col-md-6">
+                            <h2 class="@niftyClass"> @string.Format("{0:0.##}", @Model.Companies?.FirstOrDefault(x => x.Symbol == "NIFTY 50").Change) </h2>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                <h5 class="card-title text-secondary">Volume</h5>
+                    <h2 class="@volumeClass">@ConvertToMillions(@Model.Companies?.FirstOrDefault(x => x.Symbol == "NIFTY 50").totalTradedVolume.ToString())</h2>
+
+                 </div>
+            </div>
+        </div>
+       
+    </div>
+</div>
+
+
+<div class="text-center mb-3">
+    <button id="statusIndicator" class="btn btn-circle"></button>
+</div>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Open</th>
+            <th>Day High</th>
+            <th>Day Low</th>
+            <th>Last Price</th>
+            <th>Previous Close</th>
+            <th>Change</th>
+            <th>% Change</th>
+            <th>Year High</th>
+            <th>Year Low</th>
+            <th>Predicted EMA Value</th>
+            <th>Predicted Linear Regression Value</th>
+            <th>Volume</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var company in highlighted)
+        {
+            var rowClass = company.PChange >= 0 ? "bg-success-light" : "bg-warning-light";
+
+            <tr class="@rowClass">
+                <td>@company.Symbol</td>
+                <td>@company.Open</td>
+                <td>@company.DayHigh</td>
+                <td>@company.DayLow</td>
+                <td>@string.Format("{0:0.##}", company.LastPrice)</td>
+                <td>@string.Format("{0:0.##}", company.PreviousClose)</td>
+                <td class="@(company.Change >= 0 ? "text-success" : "text-danger")">@string.Format("{0:0.##}", company.Change)</td>
+                <td class="@(company.PChange >= 0 ? "text-success" : "text-danger")">@string.Format("{0:0.##}", company.PChange)</td>
+                <td>@string.Format("{0:0.##}", company.YearHigh)</td>
+                <td>@string.Format("{0:0.##}", company.YearLow)</td>
+                <td class="@(company.PredictedValueEMA >= company.LastPrice ? "text-success" : "text-danger")">@string.Format("{0:0.##}", company.PredictedValueEMA)</td>
+                <td class="@(company.PredictedValueLR >= company.LastPrice ? "text-success" : "text-danger")">@string.Format("{0:0.##}", company.PredictedValueLR)</td>
+                <td>@company.totalTradedVolume</td>
+            </tr>
+        }
+
+        @foreach (var company in others)
+        {
+            <tr>
+                <td>@company.Symbol</td>
+                <td>@company.Open</td>
+                <td>@company.DayHigh</td>
+                <td>@company.DayLow</td>
+                <td>@string.Format("{0:0.##}", company.LastPrice)</td>
+                <td>@string.Format("{0:0.##}", company.PreviousClose)</td>
+                <td class="@(company.Change >= 0 ? "text-success" : "text-danger")">@string.Format("{0:0.##}", company.Change)</td>
+                <td class="@(company.PChange >= 0 ? "text-success" : "text-danger")">@string.Format("{0:0.##}", company.PChange)</td>
+                <td>@string.Format("{0:0.##}", company.YearHigh)</td>
+                <td>@string.Format("{0:0.##}", company.YearLow)</td>
+                <td class="@(company.PredictedValueEMA >= company.LastPrice ? "text-success" : "text-danger")">@string.Format("{0:0.##}", company.PredictedValueEMA)</td>
+                <td class="@(company.PredictedValueLR >= company.LastPrice ? "text-success" : "text-danger")">@string.Format("{0:0.##}", company.PredictedValueLR)</td>
+                <td>@company.totalTradedVolume</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+ 
+ 
+@section Styles {
+    <style>
+        .text-success {
+            color: green;
+        }
+
+        .text-danger {
+            color: red;
+        }
+
+        .bg-success-light {
+            background-color: #d4edda; /* Lighter shade of green */
+        }
+
+        .bg-warning-light {
+            background-color: #fff3cd; /* Lighter shade of yellow */
+        }
+
+        .btn-circle {
+            width: 30px;
+            height: 30px;
+            padding: 6px 0;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 12px;
+            line-height: 1.428571429;
+        }
+        .card-body {
+            padding:0px !important;
+            margin: 0px !important;
+            height: 100px !important;
+        }
+       .card{
+            padding:0px !important;
+            margin: 0px !important; 
+        }
+
+          .card-title  {
+            padding: 0px !important;
+            margin: 0px !important;
+            
+        }
+    </style>
+    
+} 
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            function refreshData() {
+                fetch('@Url.Page("Index")')
+                    .then(response => {
+                        if (response.ok) {
+                            $("#statusIndicator").removeClass("btn-danger").addClass("btn-success");
+                            return response.text();
+                        } else {
+                            $("#statusIndicator").removeClass("btn-success").addClass("btn-danger");
+                        }
+                    })
+                    .then(data => {
+                        document.body.innerHTML = data;
+                    })
+                    .catch(error => {
+                        $("#statusIndicator").removeClass("btn-success").addClass("btn-danger");
+                    });
+            }
+
+            $("#statusIndicator").click(function() {
+                refreshData();
+            });
+
+            setInterval(function() {
+                refreshData();
+            }, 800);
+        });
+    </script>
+}

@@ -1,0 +1,30 @@
+﻿@page
+@model PrivacyModel
+@{
+    ViewData["Title"] = "DII/FII";
+}
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Buy Value (₹ Crores)</th>
+            <th>Sell Value (₹ Crores)</th>
+            <th>Net Value (₹ Crores)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Data)
+        {
+            <tr>
+                <td>@item.Category</td>
+                <td>@item.Date</td>
+                <td>@item.BuyValue</td>
+                <td>@item.SellValue</td>
+                <td>@item.NetValue</td>
+            </tr>
+        }
+    </tbody>
+</table>
