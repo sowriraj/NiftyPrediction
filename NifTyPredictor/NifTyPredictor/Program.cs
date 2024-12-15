@@ -21,6 +21,7 @@ var cookieContainer2 = new CookieContainer();
 builder.Services.AddHttpClient("nseClient", client =>
 {
     client.BaseAddress = new Uri("https://www.nseindia.com/");
+    client.DefaultRequestVersion = HttpVersion.Version11;
     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
     client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
     client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
@@ -40,6 +41,7 @@ builder.Services.AddHttpClient("nseClient", client =>
 builder.Services.AddHttpClient("nsebankClient", client =>
 {
     client.BaseAddress = new Uri("https://www.nseindia.com/");
+    client.DefaultRequestVersion = HttpVersion.Version11;
     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
     client.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
     client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
