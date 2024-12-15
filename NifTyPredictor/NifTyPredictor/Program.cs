@@ -58,7 +58,8 @@ builder.Services.AddHttpClient("nsebankClient", client =>
     DefaultProxyCredentials = CredentialCache.DefaultCredentials
 });
 
-
+// Enable specific security protocols (TLS 1.2 and TLS 1.3)
+ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
 var app = builder.Build();
 
 
